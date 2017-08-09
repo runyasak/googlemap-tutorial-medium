@@ -82,7 +82,7 @@ export default {
       let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
       console.log('C', c)
       let d = R * c
-      return (d / 1000).toFixed(2) // returns the distance in meter
+      return (d / 1000).toFixed(2) // returns the distance in kilometer
     }
   }
 }
