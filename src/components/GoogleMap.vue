@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="google-map" :id="mapName"></div>
-    <button @click="justClick">Click Me</button>
+    <button @click="getDistance">Click Me</button>
   </div>
 </template>
 
@@ -62,11 +62,27 @@ export default {
         }
       }, 1000)
     },
-    justClick () {
-      console.log(this.getLocation())
-      this.getLocation().then((res) => {
-        console.log(res)
-      })
+    getDistance () {
+      let p1 = new google.maps.LatLng(this.markerCoordinates[0].latitude, this.markerCoordinates[0].longitude)
+      let p2 = new google.maps.LatLng(this.markerCoordinates[1].latitude, this.markerCoordinates[1].longitude)
+      console.log(this.calculateDistance(p1, p2))
+    },
+    rad (x) {
+      return x * Math.PI / 180
+    },
+    calculateDistance (p1, p2) {
+      console.log('p1', p1)
+      console.log('p2', p2)
+      let R = 6378137 // Earth’s mean radius in meter
+      let dLat = this.rad(p2.lat() - p1.lat())
+      let dLong = this.rad(p2.lng() - p1.lng())
+      let a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(this.rad(p1.lat())) * Math.cos(this.rad(p2.lat())) *
+        Math.sin(dLong / 2) * Math.sin(dLong / 2)
+      let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
+      console.log('C', c)
+      let d = R * c
+      return (d / 1000).toFixed(2) // returns the distance in meter
     }
   }
 }
