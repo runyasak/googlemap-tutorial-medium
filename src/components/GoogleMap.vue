@@ -14,75 +14,96 @@ export default {
   data () {
     return {
       mapName: this.name + '-map',
-      markerCoordinates: [{
+      currentPosition: {
+        name: 'FlyingComma (here)',
         latitude: 13.801959,
         longitude: 100.575090
-      }, {
+      },
+      markerCoordinates: [{
+        name: 'The Street',
         latitude: 13.770238,
         longitude: 100.572120
+      }, {
+        name: 'สวนลุมไนท์พลาซ่า',
+        latitude: 13.804582,
+        longitude: 100.574625
+      }, {
+        name: 'Central Plaza Ladprao',
+        latitude: 13.815836,
+        longitude: 100.561391
       }],
       map: null,
       bounds: null,
       markers: []
     }
   },
+  computed: {
+    branchList () {
+      return this.markerCoordinates
+    }
+  },
   mounted () {
-    // navigator.geolocation.getCurrentPosition(function (location) {
-    //   console.log(location.coords.latitude)
-    //   console.log(location.coords.longitude)
-    //   console.log(location.coords.accuracy)
-    // }, function (err) {
-    //   console.log(err)
-    // }, {timeout: 10000})
-    this.createMap()
+    this.initiateMap()
   },
   methods: {
-    createMap () {
-      const operate = setInterval(() => {
+    initiateMap () {
+      let operate = setInterval(() => {
         if (google) {
+          // Bound Map
           this.bounds = new google.maps.LatLngBounds()
-          const element = document.getElementById(this.mapName)
-          // const mapCentre = this.markerCoordinates[0]
-          const options = {
-            zoom: 14
-            // center: new google.maps.LatLng(mapCentre.latitude, mapCentre.longitude)
-          }
-          this.map = new google.maps.Map(element, options)
-          console.log(this.map)
-          this.markerCoordinates.forEach((coord) => {
-            const markerPos = new google.maps.LatLng(coord.latitude, coord.longitude)
-            const marker = new google.maps.Marker({
-              position: markerPos,
-              map: this.map
-            })
-            this.markers.push(marker)
-            this.map.fitBounds(this.bounds.extend(markerPos))
-          })
+          let element = document.getElementById(this.mapName)
+          let mapCenter = this.currentPosition
+          this.createMap(element, mapCenter)
+          this.addMapMarkder(this.markerCoordinates)
           clearInterval(operate)
         }
       }, 1000)
     },
+    createMap (element, mapCenter) {
+      const options = {
+        zoom: 13,
+        center: new google.maps.LatLng(mapCenter.latitude, mapCenter.longitude)
+      }
+      this.map = new google.maps.Map(element, options)
+    },
+    addMapMarkder (markers, bound) {
+      markers.forEach((coord) => {
+        const markerPos = new google.maps.LatLng(coord.latitude, coord.longitude)
+        const marker = new google.maps.Marker({
+          position: markerPos,
+          map: this.map
+        })
+        this.markers.push(marker)
+        if (bound) this.map.fitBounds(this.bounds.extend(markerPos))
+      })
+    },
     getDistance () {
-      let p1 = new google.maps.LatLng(this.markerCoordinates[0].latitude, this.markerCoordinates[0].longitude)
-      let p2 = new google.maps.LatLng(this.markerCoordinates[1].latitude, this.markerCoordinates[1].longitude)
-      console.log(this.calculateDistance(p1, p2))
+      this.markerCoordinates.forEach((marker) => {
+        marker.distance = this.calculateDistance(this.currentPosition, marker)
+      })
+      this.sortByDistance()
+      console.log('complete!')
     },
     rad (x) {
       return x * Math.PI / 180
     },
     calculateDistance (p1, p2) {
-      console.log('p1', p1)
-      console.log('p2', p2)
+      let googleP1 = new google.maps.LatLng(p1.latitude, p1.longitude)
+      let googleP2 = new google.maps.LatLng(p2.latitude, p2.longitude)
       let R = 6378137 // Earth’s mean radius in meter
-      let dLat = this.rad(p2.lat() - p1.lat())
-      let dLong = this.rad(p2.lng() - p1.lng())
+      let dLat = this.rad(googleP2.lat() - googleP1.lat())
+      let dLong = this.rad(googleP2.lng() - googleP1.lng())
       let a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-        Math.cos(this.rad(p1.lat())) * Math.cos(this.rad(p2.lat())) *
+        Math.cos(this.rad(googleP1.lat())) * Math.cos(this.rad(googleP2.lat())) *
         Math.sin(dLong / 2) * Math.sin(dLong / 2)
       let c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-      console.log('C', c)
       let d = R * c
       return (d / 1000).toFixed(2) // returns the distance in kilometer
+    },
+    sortByDistance () {
+      return this.markerCoordinates.sort((a, b) => {
+        return a.distance - b.distance
+      })
     }
   }
 }
