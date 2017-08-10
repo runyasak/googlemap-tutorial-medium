@@ -1,7 +1,11 @@
 <template>
   <div>
     <div class="google-map" :id="mapName"></div>
-    <button @click="getDistance">Click Me</button>
+    <!-- <button @click="getDistance">Click Me</button> -->
+    <li v-for="(branch, index) in markerCoordinates" 
+        :key="index">
+      {{ branch }}
+    </li>
   </div>
 </template>
 
@@ -43,21 +47,27 @@ export default {
     }
   },
   mounted () {
-    this.initiateMap()
+    this.checkGoogle(() => {
+      this.initiateMap()
+      this.generateDistance()
+    })
   },
   methods: {
-    initiateMap () {
+    checkGoogle (callback) {
       let operate = setInterval(() => {
         if (google) {
-          // Bound Map
-          this.bounds = new google.maps.LatLngBounds()
-          let element = document.getElementById(this.mapName)
-          let mapCenter = this.currentPosition
-          this.createMap(element, mapCenter)
-          this.addMapMarkder(this.markerCoordinates)
           clearInterval(operate)
         }
       }, 1000)
+      callback()
+    },
+    initiateMap () {
+      // Bound Map
+      this.bounds = new google.maps.LatLngBounds()
+      let element = document.getElementById(this.mapName)
+      let mapCenter = this.currentPosition
+      this.createMap(element, mapCenter)
+      this.addMapMarkder(this.markerCoordinates)
     },
     createMap (element, mapCenter) {
       const options = {
@@ -77,12 +87,11 @@ export default {
         if (bound) this.map.fitBounds(this.bounds.extend(markerPos))
       })
     },
-    getDistance () {
+    generateDistance () {
       this.markerCoordinates.forEach((marker) => {
         marker.distance = this.calculateDistance(this.currentPosition, marker)
       })
       this.sortByDistance()
-      console.log('complete!')
     },
     rad (x) {
       return x * Math.PI / 180
