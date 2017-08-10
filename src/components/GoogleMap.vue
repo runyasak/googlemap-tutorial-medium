@@ -1,12 +1,29 @@
 <template>
-  <div>
-    <div class="google-map" :id="mapName"></div>
-    <!-- <button @click="getDistance">Click Me</button> -->
-    <li v-for="(branch, index) in markerCoordinates" 
-        :key="index">
-      {{ branch }}
-    </li>
+  <div class="container has-text-centered">
+    <div class="columns is-vcentered">
+      <div class="column is-5">
+        <div class="box related-list">
+          <div style="height: 300px; text-align: left;">
+            <ul class="menu-list">
+              <li v-for="(partner, index) in markerCoordinates" :key="index">
+                <a>
+                  <span>{{ `${partner.name}` }}</span>
+                  <span class="partner-distance">
+                    <icon name="location-arrow"></icon> {{`${partner.distance + ' km' || ''}`}}
+                  </span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="column is-7">
+         <div class="google-map" :id="mapName">
+        </div> 
+      </div>
+    </div>
   </div>
+
 </template>
 
 <script>
@@ -42,7 +59,7 @@ export default {
     }
   },
   computed: {
-    branchList () {
+    partnerList () {
       return this.markerCoordinates
     }
   },
@@ -122,9 +139,18 @@ export default {
 
 <style scoped>
 .google-map {
-  width: 800px;
-  height: 600px;
-  margin: 0 auto;
+  /* width: 450px; */
+  height: 440px;
+  margin: 0; 
   background: gray;
+}
+span.partner-distance  {
+  display: block;
+  font-size: 0.85rem; 
+  color: #95A5A6;
+}
+.fa-icon {
+  width: auto;
+  height: 0.85rem; /* or any other relative font sizes */
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-  <google-map name="example">
+  <google-map name="partner">
   </google-map>
 </template>
 
