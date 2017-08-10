@@ -47,19 +47,21 @@ export default {
     }
   },
   mounted () {
-    this.checkGoogle(() => {
+    this.checkGoogle().then(elem => {
       this.initiateMap()
       this.generateDistance()
     })
   },
   methods: {
-    checkGoogle (callback) {
-      let operate = setInterval(() => {
-        if (google) {
-          clearInterval(operate)
-        }
-      }, 1000)
-      callback()
+    checkGoogle () {
+      return new Promise((resolve, reject) => {
+        let operate = setInterval(() => {
+          if (google) {
+            resolve(google)
+            clearInterval(operate)
+          }
+        }, 100)
+      })
     },
     initiateMap () {
       // Bound Map
@@ -117,6 +119,7 @@ export default {
   }
 }
 </script>
+
 <style scoped>
 .google-map {
   width: 800px;
