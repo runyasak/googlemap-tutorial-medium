@@ -8,7 +8,7 @@
               <li v-for="(partner, index) in markerCoordinates" :key="index">
                 <a>
                   <span>{{ `${partner.name}` }}</span>
-                  <span class="partner-distance">
+                  <span v-if="partner.distance" class="partner-distance">
                     <icon name="location-arrow"></icon> {{`${partner.distance + ' km' || ''}`}}
                   </span>
                 </a>
@@ -36,10 +36,9 @@ export default {
     return {
       mapName: this.name + '-map',
       currentPosition: {
-        name: 'FlyingComma (here)',
         icon: 'https://scontent.fbkk5-6.fna.fbcdn.net/v/t1.0-9/20664138_10209348452935128_8696622600378619713_n.jpg?oh=b42f621ead91ee2f5991e672141dd066&oe=5A381B32',
-        latitude: 13.801959,
-        longitude: 100.575090
+        latitude: 13.803915,
+        longitude: 100.553442
       },
       markerCoordinates: [{
         name: 'The Street',
@@ -56,21 +55,17 @@ export default {
       }],
       map: null,
       bounds: null,
-      markers: []
-    }
-  },
-  computed: {
-    partnerList () {
-      return this.markerCoordinates
+      markers: [],
+      mapElement: ''
     }
   },
   async mounted () {
+    this.mapElement = await document.getElementById(this.mapName)
     await this.checkGoogle()
-    this.initiateMap()
-    this.generateDistance()
-    // this.getCurrentLocation().then(pos => {
-    //   console.log(pos)
-    // })
+    await this.initiateMap(this.mapElement, this.currentPosition)
+    await this.generateDistance()
+    // Set Current Position
+    await this.adjustCurrentLocation()
   },
   methods: {
     checkGoogle () {
@@ -87,11 +82,10 @@ export default {
         }
       })
     },
-    initiateMap () {
+    initiateMap (element, mapCenter) {
       // Bound Map
       this.bounds = new google.maps.LatLngBounds()
-      let element = document.getElementById(this.mapName)
-      this.createMap(element, this.currentPosition)
+      this.createMap(element, mapCenter)
       this.generateMapMarker(this.markerCoordinates)
     },
     createMap (element, mapCenter) {
@@ -129,9 +123,6 @@ export default {
       })
       this.sortByDistance()
     },
-    rad (x) {
-      return x * Math.PI / 180
-    },
     getCurrentLocation () {
       return new Promise((resolve, reject) => {
         try {
@@ -145,6 +136,13 @@ export default {
           reject(new Error(error))
         }
       })
+    },
+    async adjustCurrentLocation () {
+      this.currentPosition = await this.getCurrentLocation()
+      await this.initiateMap(this.mapElement, this.currentPosition)
+    },
+    rad (x) {
+      return x * Math.PI / 180
     },
     calculateDistance (p1, p2) {
       let googleP1 = new google.maps.LatLng(p1.latitude, p1.longitude)
