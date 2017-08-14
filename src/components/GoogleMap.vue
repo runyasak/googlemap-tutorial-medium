@@ -92,13 +92,22 @@ export default {
       var input = document.getElementById('address-input')
       var autocomplete = new google.maps.places.Autocomplete(input)
       autocomplete.bindTo('bounds', this.map)
+      var tempCreateMap = (mapCenter) => {
+        let image = 'https://scontent.fbkk5-6.fna.fbcdn.net/v/t1.0-9/20664138_10209348452935128_8696622600378619713_n.jpg?oh=b42f621ead91ee2f5991e672141dd066&oe=5A381B32'
+        console.log(mapCenter.geometry.location)
+        this.map.setCenter(mapCenter.geometry.location)
+        this.addMarker(mapCenter.geometry.location, image)
+        this.generateMapMarker(mapCenter)
+      }
       autocomplete.addListener('place_changed', function () {
         var place = autocomplete.getPlace()
         if (!place.geometry) {
           window.alert("No details available for input: '" + place.name + "'")
           return
         } else {
-          console.log(place.geometry)
+          tempCreateMap(place)
+          // this.createMap(element, place)
+          // console.log(place.geometry)
         }
         // if (place.geometry.viewport) {
         //   console.log('viewpoint', place.geometry.location.lat())
@@ -114,7 +123,7 @@ export default {
     createMap (element, mapCenter) {
       const options = {
         zoom: 14,
-        center: new google.maps.LatLng(mapCenter.latitude, mapCenter.longitude)
+        center: mapCenter.geometry ? mapCenter.geometry.location : {lat: mapCenter.latitude, lng: mapCenter.longitude}
       }
       this.map = new google.maps.Map(element, options)
       this.generateMapMarker(mapCenter)
@@ -122,7 +131,7 @@ export default {
     generateMapMarker (markers, bound) {
       if (Array.isArray(markers)) {
         markers.forEach((coord) => {
-          let markerPos = new google.maps.LatLng(coord.latitude, coord.longitude)
+          let markerPos = {lat: coord.latitude, lng: coord.longitude}
           this.addMarker(markerPos, null, bound)
         })
       } else {
