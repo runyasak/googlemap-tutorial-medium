@@ -116,7 +116,6 @@ export default {
         zoom: 14,
         center: new google.maps.LatLng(mapCenter.latitude, mapCenter.longitude)
       }
-      console.log(options.center)
       this.map = new google.maps.Map(element, options)
       this.generateMapMarker(mapCenter)
     },
