@@ -5,6 +5,7 @@
         <div class="box related-list">
           <div style="height: 300px; text-align: left;">
             <ul class="menu-list">
+              <input class="input" id="address-input" type="text" placeholder="Text input">
               <li v-for="(partner, index) in markerCoordinates" :key="index">
                 <a>
                   <span>{{ `${partner.name}` }}</span>
@@ -87,12 +88,35 @@ export default {
       this.bounds = new google.maps.LatLngBounds()
       this.createMap(element, mapCenter)
       this.generateMapMarker(this.markerCoordinates)
+      // AutoComplete
+      var input = document.getElementById('address-input')
+      var autocomplete = new google.maps.places.Autocomplete(input)
+      autocomplete.bindTo('bounds', this.map)
+      autocomplete.addListener('place_changed', function () {
+        var place = autocomplete.getPlace()
+        if (!place.geometry) {
+          window.alert("No details available for input: '" + place.name + "'")
+          return
+        } else {
+          console.log(place.geometry)
+        }
+        // if (place.geometry.viewport) {
+        //   console.log('viewpoint', place.geometry.location.lat())
+        //   return
+        //   // this.map.fitBounds(place.geometry.viewport)
+        // } else {
+        //   console.log('else', place.geometry)
+        //   // map.setCenter(place.geometry.location)
+        //   // map.setZoom(17);  // Why 17? Because it looks good.
+        // }
+      })
     },
     createMap (element, mapCenter) {
       const options = {
-        zoom: 13,
+        zoom: 14,
         center: new google.maps.LatLng(mapCenter.latitude, mapCenter.longitude)
       }
+      console.log(options.center)
       this.map = new google.maps.Map(element, options)
       this.generateMapMarker(mapCenter)
     },
@@ -139,6 +163,7 @@ export default {
     },
     async adjustCurrentLocation () {
       this.currentPosition = await this.getCurrentLocation()
+      console.log(this.currentPosition)
       await this.initiateMap(this.mapElement, this.currentPosition)
     },
     rad (x) {
